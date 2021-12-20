@@ -1,9 +1,10 @@
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <ncurses.h>
+
+#define NUM_OF_ENEMIES 3
 
 void print_coords(int x, int y, int max_x)
 {
@@ -50,37 +51,45 @@ void game_loop(int x, int y, int max_x, int max_y, char* character)
         /* running getmaxyx in the while loop
          * allows for window resizing */
         getmaxyx(stdscr, max_y, max_x);
+
         clear();
         attron(A_BOLD);
         mvprintw(y, x, character);
         print_coords(x, y, max_x);
         attroff(A_BOLD);
 
-        int locations_of_enemies[3][2] = {
+        /* Creates all of the enemies and
+         * checks for collision */
+        int locations_of_enemies[NUM_OF_ENEMIES][2] = {
             {5, 5},
             {8, 9},
             {35, 26}
         };
-
-        if (create_enemies(x, y, 3, locations_of_enemies)) {
+        if (create_enemies(x, y, NUM_OF_ENEMIES, locations_of_enemies)) {
             getch();
             break;
         }
 
+        /* Allows character movement with
+         * WASD or HJKL */
         switch (getch()) {
+        case 'j':
         case 's':
             character = "\\o/";
             y++;
             break;
+        case 'k':
         case 'w':
             character = "/o\\";
             y--;
             break;
+        case 'l':
         case 'd':
             character = "|o>";
             // x += 2;
             x++;
             break;
+        case 'h':
         case 'a':
             character = "<o|";
             // x -= 2;
@@ -107,16 +116,19 @@ void game_loop(int x, int y, int max_x, int max_y, char* character)
 
 int main()
 {
+    /* Basic variable init */
     int x = 0, y = 0;
     int max_x = 0, max_y = 0;
     int next_x = 0;
     int direction = 1;
     char* character = "o";
 
+    /* Inits ncurses */
     initscr();
     noecho();
     curs_set(FALSE);
 
+    /* Runs the actual game*/
     game_loop(x, y, max_x, max_y, character);
 
     endwin();
